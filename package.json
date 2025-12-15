@@ -14,14 +14,15 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "test": "echo \"Real devs test in prod\" && exit 1",
+    "build:dev": "tsc",
+    "build:prod": "esbuild --bundle src/engine/main.ts --outfile=./build/bundle.js --minify",
     "watch": "tsc --watch",
-    "bundle": "esbuild --bundle src/engine/main.ts --outfile=./build/bundle.js --minify",
     "clean": "rm -rf build",
-    "serve": "npx http-server -p 8080"
+    "dev": "concurrently \"npm run watch\" \"http-server -p 8080\""
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "esbuild": "^0.27.1",
     "http-server": "^14.1.1",
     "typescript": "^5.9.3"
