@@ -60,8 +60,7 @@ export class GameEngine {
             throw new Error("Lost canvas context!");
         }
 
-        // TODO(pg): what is the type of `e`?
-        const getXandY = (e: any) => ({
+        const getXandY = (e: MouseEvent) => ({
             x: e.clientX - (this.ctx?.canvas.getBoundingClientRect().left as number),
             y: e.clientY - (this.ctx?.canvas.getBoundingClientRect().top as number)
         });
