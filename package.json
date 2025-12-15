@@ -1,0 +1,29 @@
+{
+  "name": "tcss491-gameengine",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Icefire114/TCSS491-GameEngine#readme",
+  "bugs": {
+    "url": "https://github.com/Icefire114/TCSS491-GameEngine/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Icefire114/TCSS491-GameEngine.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "bundle": "esbuild --bundle src/engine/main.ts --outfile=./build/bundle.js --minify",
+    "clean": "rm -rf build",
+    "serve": "npx http-server -p 8080"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.1",
+    "http-server": "^14.1.1",
+    "typescript": "^5.9.3"
+  }
+}

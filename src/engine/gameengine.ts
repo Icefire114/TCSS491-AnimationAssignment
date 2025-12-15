@@ -1,7 +1,22 @@
 // This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
+import { Entity } from "./types.js";
+import { Timer } from "./timer.js";
 
-class GameEngine {
-    constructor(options) {
+export class GameEngine {
+    private ctx: CanvasRenderingContext2D | null;
+    private entities: Entity[];
+    private click: { x: number, y: number } | null;
+    private mouse: { x: number, y: number } | null;
+    private wheel: { x: number, y: number } | null;
+    private keys: { [key: string]: boolean };
+    private options: { debugging: boolean };
+    private running: boolean;
+    private timer: Timer;
+    private rightclick: { x: number, y: number } | null;
+    private clockTick: number;
+
+
+    constructor(options?: { debugging: boolean; }) {
         // What you will use to draw
         // Documentation: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
         this.ctx = null;
@@ -19,9 +34,13 @@ class GameEngine {
         this.options = options || {
             debugging: false,
         };
+        this.running = false;
+        this.timer = new Timer();
+        this.rightclick = null;
+        this.clockTick = 0;
     };
 
-    init(ctx) {
+    init(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
@@ -31,17 +50,22 @@ class GameEngine {
         this.running = true;
         const gameLoop = () => {
             this.loop();
-            requestAnimFrame(gameLoop, this.ctx.canvas);
+            requestAnimationFrame(gameLoop);
         };
         gameLoop();
     };
 
     startInput() {
-        const getXandY = e => ({
-            x: e.clientX - this.ctx.canvas.getBoundingClientRect().left,
-            y: e.clientY - this.ctx.canvas.getBoundingClientRect().top
+        if (!this.ctx) {
+            throw new Error("Lost canvas context!");
+        }
+
+        // TODO(pg): what is the type of `e`?
+        const getXandY = (e: any) => ({
+            x: e.clientX - (this.ctx?.canvas.getBoundingClientRect().left as number),
+            y: e.clientY - (this.ctx?.canvas.getBoundingClientRect().top as number)
         });
-        
+
         this.ctx.canvas.addEventListener("mousemove", e => {
             if (this.options.debugging) {
                 console.log("MOUSE_MOVE", getXandY(e));
@@ -58,7 +82,7 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("wheel", e => {
             if (this.options.debugging) {
-                console.log("WHEEL", getXandY(e), e.wheelDelta);
+                console.log("WHEEL", getXandY(e), e.deltaY, e.deltaX);
             }
             e.preventDefault(); // Prevent Scrolling
             this.wheel = e;
@@ -76,11 +100,14 @@ class GameEngine {
         this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
     };
 
-    addEntity(entity) {
+    addEntity(entity: Entity) {
         this.entities.push(entity);
     };
 
     draw() {
+        if (!this.ctx) {
+            throw new Error("Lost canvas context!");
+        }
         // Clear the whole canvas with transparent color (rgba(0, 0, 0, 0))
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 

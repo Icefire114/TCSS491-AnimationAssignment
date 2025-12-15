@@ -1,12 +1,17 @@
-class AssetManager {
+export class AssetManager {
+    private successCount: number;
+    private errorCount: number;
+    private cache: Record<string, HTMLImageElement>;
+    private downloadQueue: string[];
+
     constructor() {
         this.successCount = 0;
         this.errorCount = 0;
-        this.cache = [];
+        this.cache = {};
         this.downloadQueue = [];
     };
 
-    queueDownload(path) {
+    queueDownload(path: string) {
         console.log("Queueing " + path);
         this.downloadQueue.push(path);
     };
@@ -15,10 +20,14 @@ class AssetManager {
         return this.downloadQueue.length === this.successCount + this.errorCount;
     };
 
-    downloadAll(callback) {
+    /**
+     * Downloads all stored assets
+     * @param callback Called when all assets are downloaded
+     */
+    downloadAll(callback: Function) {
         if (this.downloadQueue.length === 0) setTimeout(callback, 10);
         for (let i = 0; i < this.downloadQueue.length; i++) {
-            const img = new Image();
+            const img: HTMLImageElement = new Image();
 
             const path = this.downloadQueue[i];
             console.log(path);
@@ -40,7 +49,7 @@ class AssetManager {
         }
     };
 
-    getAsset(path) {
+    getAsset(path: string): HTMLImageElement {
         return this.cache[path];
     };
 };
