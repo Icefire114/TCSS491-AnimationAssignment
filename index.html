@@ -15,7 +15,7 @@
 
         const isDev = window.location.hostname === 'localhost';
         
-        script.src = isDev ? './build/engine/main.js' : './dist/bundle.js';
+        script.src = isDev ? './build/game/main.js' : './dist/bundle.js';
         document.body.appendChild(script);
     </script>
     <canvas id="gameCanvas" width="1024" height="768" style="background: white; border: 1px solid black" tabindex="0"

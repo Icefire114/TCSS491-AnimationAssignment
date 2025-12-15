@@ -1,8 +1,7 @@
-import { GameEngine } from "./gameengine.js";
-import { AssetManager } from "./assetmanager.js";
+import { AssetManager } from "../engine/assetmanager.js";
+import { GameEngine } from "../engine/gameengine.js";
 
 const gameEngine = new GameEngine();
-
 const ASSET_MANAGER = new AssetManager();
 
 ASSET_MANAGER.downloadAll(() => {
@@ -11,4 +10,4 @@ ASSET_MANAGER.downloadAll(() => {
 
     gameEngine.init(ctx);
     gameEngine.start();
-});
+})

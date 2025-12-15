@@ -1,8 +1,8 @@
 import { GameEngine } from "./gameengine.js";
 
 export type Entity = {
-    clientX: number;
-    clientY: number;
+    X: number;
+    Y: number;
 
     removeFromWorld: boolean;
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void;
