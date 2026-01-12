@@ -10,7 +10,7 @@ ASSET_MANAGER.downloadAll((_, errorCount: number) => {
         console.error(`Error loading assets ${errorCount} of them failed to load!`)
     }
     const canvas: HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
-    const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D;
+    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     gameEngine.init(ctx);
     gameEngine.start();
