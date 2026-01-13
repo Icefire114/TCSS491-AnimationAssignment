@@ -13,8 +13,7 @@ export class Player implements Entity {
     removeFromWorld: boolean = false;
 
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void {
-        ctx.fillStyle = "#5a2100";
-        ctx.fillRect(this.X, this.Y, 10, 10);
+        ctx.drawImage(game.getSprite(this.sprite), this.X, this.Y);
     }
 
     update(keys: { [key: string]: boolean }): void {

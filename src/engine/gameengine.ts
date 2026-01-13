@@ -1,5 +1,5 @@
 // This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-import { DrawLayer, Entity, ResourcePath } from "./types.js";
+import { DrawLayer, Entity } from "./types.js";
 import { Timer } from "./timer.js";
 import { AssetManager, ImagePath } from "./assetmanager.js";
 

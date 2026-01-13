@@ -9,12 +9,14 @@ import { Player } from "./player.js";
 
 const ASSET_MANAGER = new AssetManager();
 const gameEngine = new GameEngine(ASSET_MANAGER);
+ASSET_MANAGER.queueDownload("res/img/player.png");
 
-ASSET_MANAGER.downloadAll((_, errorCount: number) => {
+ASSET_MANAGER.downloadAll((errorCount, successCount) => {
     if (errorCount > 0) {
         console.error(`Error loading assets ${errorCount} of them failed to load!`);
         alert(`Failed to load ${errorCount} assets! The game may not function correctly!`);
     }
+    console.log(`Successfully loaded ${successCount} assets!`);
 
     main();
 })
