@@ -2,8 +2,11 @@
 import { DrawLayer, Entity } from "./types.js";
 import { Timer } from "./timer.js";
 import { AssetManager, ImagePath } from "./assetmanager.js";
+import { sleep } from "./util.js";
 
 export class GameEngine {
+    private readonly TARGET_FPS: number = 120;
+
     private ctx: CanvasRenderingContext2D | null;
     private entities: [Entity, DrawLayer][];
     private click: { x: number, y: number } | null;
@@ -60,11 +63,7 @@ export class GameEngine {
 
     start() {
         this.running = true;
-        const gameLoop = () => {
-            this.loop();
-            requestAnimationFrame(gameLoop);
-        };
-        gameLoop();
+        this.loop();
     };
 
     startInput() {
@@ -140,7 +139,7 @@ export class GameEngine {
     update() {
         for (const ent of this.entities) {
             if (!ent[0].removeFromWorld) {
-                ent[0].update(this.keys);
+                ent[0].update(this.keys, this.clockTick);
             }
         }
 
@@ -153,8 +152,15 @@ export class GameEngine {
 
     loop() {
         this.clockTick = this.timer.tick();
+
+        const spare = (1000 / this.TARGET_FPS) - this.clockTick;
+        if (spare > 0) {
+            sleep(spare);
+        }
         this.update();
         this.draw();
+
+        requestAnimationFrame(() => this.loop());
     };
 
 };

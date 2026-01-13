@@ -16,12 +16,12 @@ export class Player implements Entity {
         ctx.drawImage(game.getSprite(this.sprite), this.X, this.Y);
     }
 
-    update(keys: { [key: string]: boolean }): void {
+    update(keys: { [key: string]: boolean }, deltaTime: number): void {
         if (keys["a"]) {
-            this.X -= 1
+            this.X -= 200 * deltaTime
         }
         if (keys["d"]) {
-            this.X += 1
+            this.X += 200 * deltaTime
         }
     }
 }

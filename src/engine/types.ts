@@ -11,7 +11,7 @@ export type Entity = {
 
     removeFromWorld: boolean;
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void;
-    update(keys: { [key: string]: boolean }): void;
+    update(keys: { [key: string]: boolean }, deltaTime: number): void;
 };
 
 export type DrawLayer = number & { __brand: "DrawLayer" };

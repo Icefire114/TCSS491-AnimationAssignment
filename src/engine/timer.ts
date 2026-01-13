@@ -11,7 +11,7 @@ export class Timer {
         this.lastTimestamp = 0;
     };
 
-    tick() {
+    tick(): number {
         const current = Date.now();
         const delta = (current - this.lastTimestamp) / 1000;
         this.lastTimestamp = current;
