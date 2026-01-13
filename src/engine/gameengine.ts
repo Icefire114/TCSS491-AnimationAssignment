@@ -126,13 +126,9 @@ export class GameEngine {
     };
 
     update() {
-        let entitiesCount = this.entities.length;
-
-        for (let i = 0; i < entitiesCount; i++) {
-            let entity = this.entities[i];
-
-            if (!entity[0].removeFromWorld) {
-                entity[0].update();
+        for (const ent of this.entities) {
+            if (!ent[0].removeFromWorld) {
+                ent[0].update(this.keys);
             }
         }
 

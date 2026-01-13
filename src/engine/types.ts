@@ -9,7 +9,7 @@ export type Entity = {
 
     removeFromWorld: boolean;
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void;
-    update(): void;
+    update(keys: { [key: string]: boolean }): void;
 };
 
 export type DrawLayer = number & { __brand: "DrawLayer" };

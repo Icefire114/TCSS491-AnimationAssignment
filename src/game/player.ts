@@ -15,7 +15,12 @@ export class Player implements Entity {
         ctx.fillRect(this.X, this.Y, 10, 10);
     }
 
-    update(): void {
-        // throw new Error("Method not implemented.");
+    update(keys: { [key: string]: boolean }): void {
+        if (keys["a"]) {
+            this.X -= 1
+        }
+        if (keys["d"]) {
+            this.X += 1
+        }
     }
 }

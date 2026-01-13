@@ -14,7 +14,12 @@ const ASSET_MANAGER = new AssetManager();
 function main() {
     gameEngine.addEntity(new Player(), DrawLayer.MAX)
 
-    gameEngine.start();
+    try {
+        gameEngine.start();
+    } catch (e) {
+        console.error(`Engine has encounted an uncaught error! ${e}`);
+        alert(`Engine has encounted an uncaught error! ${e}`);
+    }
 }
 
 ASSET_MANAGER.downloadAll((_, errorCount: number) => {
@@ -24,10 +29,7 @@ ASSET_MANAGER.downloadAll((_, errorCount: number) => {
     }
     const canvas: HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-    console.log(`CTX IS: ${ctx}`);
 
     gameEngine.init(ctx);
     main();
 })
-
-
