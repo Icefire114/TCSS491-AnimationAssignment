@@ -1,5 +1,6 @@
 import { AssetManager } from "../engine/assetmanager.js";
 import { GameEngine } from "../engine/gameengine.js";
+import { DrawLayer } from "../engine/types.js";
 import { Player } from "./player.js";
 
 /**
@@ -11,7 +12,7 @@ const ASSET_MANAGER = new AssetManager();
 
 
 function main() {
-    gameEngine.addEntity(new Player())
+    gameEngine.addEntity(new Player(), DrawLayer.MAX)
 
     gameEngine.start();
 }

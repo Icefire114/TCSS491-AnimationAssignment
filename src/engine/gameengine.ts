@@ -1,10 +1,10 @@
 // This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-import { Entity } from "./types.js";
+import { DrawLayer, Entity } from "./types.js";
 import { Timer } from "./timer.js";
 
 export class GameEngine {
     private ctx: CanvasRenderingContext2D | null;
-    private entities: Entity[];
+    private entities: [Entity, DrawLayer][];
     private click: { x: number, y: number } | null;
     private mouse: { x: number, y: number } | null;
     private wheel: { x: number, y: number } | null;
@@ -99,8 +99,15 @@ export class GameEngine {
         this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
     };
 
-    addEntity(entity: Entity) {
-        this.entities.push(entity);
+    /**
+     * Registers an entity to be drawn and updated when the engine ticks.
+     *
+     * @param entity The entity to add.
+     * @param drawPriority The priority in which entites should be drawn, 
+     * lower numbers = drawn earlier, bigger numbers = drawn later.
+     */
+    addEntity(entity: Entity, drawPriority: DrawLayer) {
+        this.entities.push([entity, drawPriority]);
     };
 
     draw() {
@@ -110,9 +117,11 @@ export class GameEngine {
         // Clear the whole canvas with transparent color (rgba(0, 0, 0, 0))
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Draw latest things first
-        for (let i = this.entities.length - 1; i >= 0; i--) {
-            this.entities[i].draw(this.ctx, this);
+        // Sort the entities by their draw priority, lower numbers = drawn earlier, bigger numbers = drawn later.
+        // And then draw them, no garuntee of order when their draw priority is the same.
+        this.entities.sort((a, b) => a[1] - b[1])
+        for (const ent of this.entities) {
+            ent[0].draw(this.ctx, this);
         }
     };
 
@@ -122,13 +131,13 @@ export class GameEngine {
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            if (!entity.removeFromWorld) {
-                entity.update();
+            if (!entity[0].removeFromWorld) {
+                entity[0].update();
             }
         }
 
         for (let i = this.entities.length - 1; i >= 0; --i) {
-            if (this.entities[i].removeFromWorld) {
+            if (this.entities[i][0].removeFromWorld) {
                 this.entities.splice(i, 1);
             }
         }

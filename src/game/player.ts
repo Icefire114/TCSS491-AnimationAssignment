@@ -1,6 +1,10 @@
 import { GameEngine } from "../engine/gameengine.js";
 import { Entity } from "../engine/types.js";
 
+/**
+ * @author PG
+ * @description The main player class.
+ */
 export class Player implements Entity {
     X: number = 0;
     Y: number = 0;
