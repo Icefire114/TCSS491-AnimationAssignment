@@ -1,3 +1,4 @@
+import { ImagePath } from "../engine/assetmanager.js";
 import { GameEngine } from "../engine/gameengine.js";
 import { Entity } from "../engine/types.js";
 
@@ -6,6 +7,7 @@ import { Entity } from "../engine/types.js";
  * @description The main player class.
  */
 export class Player implements Entity {
+    sprite: ImagePath = new ImagePath("res/img/player.png");
     X: number = 0;
     Y: number = 0;
     removeFromWorld: boolean = false;

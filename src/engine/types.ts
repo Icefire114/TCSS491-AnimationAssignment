@@ -1,3 +1,4 @@
+import { ImagePath } from "./assetmanager.js";
 import { GameEngine } from "./gameengine.js";
 
 /**
@@ -6,6 +7,7 @@ import { GameEngine } from "./gameengine.js";
 export type Entity = {
     X: number;
     Y: number;
+    sprite: ImagePath;
 
     removeFromWorld: boolean;
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void;
@@ -28,5 +30,12 @@ export namespace DrawLayer {
             throw new RangeError(`DrawLayer must be an integer between ${MIN} and ${MAX}!`);
         }
         return value as DrawLayer;
+    }
+}
+
+export type ResourcePath = string & { __brand: "ResourcePath" };
+export namespace ResourcePath {
+    export function of(value: string): ResourcePath {
+        return value as ResourcePath;
     }
 }

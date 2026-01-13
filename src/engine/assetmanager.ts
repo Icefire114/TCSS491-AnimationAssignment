@@ -1,7 +1,9 @@
+import { ResourcePath } from "./types";
+
 export class AssetManager {
     private successCount: number;
     private errorCount: number;
-    private cache: Record<string, HTMLImageElement>;
+    private cache: Record<ResourcePath, HTMLImageElement>;
     private downloadQueue: string[];
 
     constructor() {
@@ -45,12 +47,32 @@ export class AssetManager {
             });
 
             img.src = path;
-            this.cache[path] = img;
+            this.cache[ResourcePath.of(path)] = img;
         }
     };
 
-    getAsset(path: string): HTMLImageElement {
-        return this.cache[path];
+    getImage(path: ImagePath): HTMLImageElement {
+        return this.cache[path.asRaw()];
     };
 };
 
+/**
+ * Represents a path to an image, eg. for using as a sprite.
+ */
+export class ImagePath {
+    private path: ResourcePath;
+
+    constructor(path: string) {
+        if (!path.endsWith(".png") || !path.endsWith(".jpg") || !path.endsWith(".jpeg")) {
+            throw new Error("Image path must be a path to an actual image!");
+        }
+        this.path = ResourcePath.of(path);
+    }
+
+    /**
+     * @returns The raw `ResourcePath` of this current `ImagePath`.
+     */
+    asRaw(): ResourcePath {
+        return this.path;
+    }
+}

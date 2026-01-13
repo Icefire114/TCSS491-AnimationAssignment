@@ -1,6 +1,7 @@
 // This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-import { DrawLayer, Entity } from "./types.js";
+import { DrawLayer, Entity, ResourcePath } from "./types.js";
 import { Timer } from "./timer.js";
+import { AssetManager, ImagePath } from "./assetmanager.js";
 
 export class GameEngine {
     private ctx: CanvasRenderingContext2D | null;
@@ -14,9 +15,10 @@ export class GameEngine {
     private timer: Timer;
     private rightclick: { x: number, y: number } | null;
     private clockTick: number;
+    private assetManager: AssetManager;
 
 
-    constructor(options?: { debugging: boolean; }) {
+    constructor(assetManager: AssetManager, options?: { debugging: boolean; }) {
         // What you will use to draw
         // Documentation: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
         this.ctx = null;
@@ -38,7 +40,17 @@ export class GameEngine {
         this.timer = new Timer();
         this.rightclick = null;
         this.clockTick = 0;
+        this.assetManager = assetManager;
+
+        const canvas: HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
+        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        this.init(ctx);
     };
+
+    getSprite(path: ImagePath): HTMLImageElement {
+        return this.assetManager.getImage(path);
+    }
+
 
     init(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
