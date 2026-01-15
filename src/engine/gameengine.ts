@@ -1,15 +1,16 @@
-// This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
 import { DrawLayer } from "./types.js";
 import { Entity } from "./Entity.js";
 import { Timer } from "./timer.js";
 import { AssetManager, ImagePath } from "./assetmanager.js";
-import { sleep } from "./util.js";
+import { sleep, unwrap } from "./util.js";
+import { Player } from "../game/player.js";
 
 export class GameEngine {
     /**
      * The single instance of the game engine.
      */
     public static g_INSTANCE: GameEngine;
+    public static readonly WORLD_UNITS_IN_VIEWPORT = 100;
 
     private readonly TARGET_FPS: number = 120;
     /**
@@ -169,6 +170,20 @@ export class GameEngine {
             }
         }
 
+        // Update camera to follow player.
+        const player = this.getEntityByTag("player");
+        if (player && this.ctx) {
+            // Horizontal following
+            const player_screen_pecentage_x = 0.15;
+            const player_world_offset_x = player_screen_pecentage_x * GameEngine.WORLD_UNITS_IN_VIEWPORT;
+            this.viewportX = player.X - player_world_offset_x;
+
+            // Vertical following (center player)
+            const aspect_ratio = this.ctx.canvas.height / this.ctx.canvas.width;
+            const world_units_in_viewport_y = GameEngine.WORLD_UNITS_IN_VIEWPORT * aspect_ratio;
+            this.viewportY = player.Y - (world_units_in_viewport_y / 2);
+        }
+
         for (let i = this.entities.length - 1; i >= 0; --i) {
             if (this.entities[i][0].removeFromWorld) {
                 this.entities.splice(i, 1);
@@ -191,6 +206,10 @@ export class GameEngine {
         requestAnimationFrame(() => this.loop());
     };
 
+    /**
+     * @param tag The tag of the entity to find
+     * @returns The entity with the given tag or undefined if no such entity could be found.
+     */
     getEntityByTag(tag: string): Entity | undefined {
         return this.entities.find(ent => ent[0].tag === tag)?.[0];
     };

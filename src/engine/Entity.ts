@@ -13,9 +13,9 @@ export type Entity = {
     Y: number;
 
     /// Current x velocity
-    dX: number;
+    xV: number;
     /// Current y velocity
-    dY: number;
+    yV: number;
 
     physicsCollider: Collider | null;
     sprite: ImagePath | null;

@@ -6,44 +6,55 @@ import { clamp, unwrap } from "../engine/util.js";
 import { Player } from "./player.js";
 
 export class Mountain implements Entity {
-    physicsCollider = new MountainCollider();
+    physicsCollider: MountainCollider | null = null;
     tag = "mountain";
 
     constructor() {
         // Load the default level into the engine
         fetch('res/levels/main.json').then(response => response.json()).then(data => {
             GameEngine.g_INSTANCE.terrainData = data;
+            this.physicsCollider = new MountainCollider(data.y);
+            unwrap(GameEngine.g_INSTANCE.getEntityByTag("player")).Y = data.y[0] + 20;
         });
     }
 
     X: number = 0;
     Y: number = 0;
-    dX: number = 0;
-    dY: number = 0;
+    xV: number = 0;
+    yV: number = 0;
     sprite: ImagePath | null = null;
     removeFromWorld: boolean = false;
 
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void {
-        if (GameEngine.g_INSTANCE.terrainData == null) {
+        if (game.terrainData == null) {
             console.error("Mountain terrain data not yet loaded!");
             return;
         }
+        const scale = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
 
-        const player: Player = unwrap(game.getEntityByTag("player")) as Player;
+        // Render nodes that are within the viewport
+        const viewport_left_world = game.viewportX;
+        const viewport_right_world = game.viewportX + GameEngine.WORLD_UNITS_IN_VIEWPORT / game.zoom;
 
-        const lower = clamp(Math.floor(player.X) - 20, 0, GameEngine.g_INSTANCE.terrainData.y.length)
-        const upper = clamp(Math.floor(player.X) + 20, 0, GameEngine.g_INSTANCE.terrainData.y.length)
+        const lower = clamp(Math.floor(viewport_left_world), 0, game.terrainData.y.length);
+        const upper = clamp(Math.ceil(viewport_right_world), 0, game.terrainData.y.length);
 
-        let nodesToRender: number[] = GameEngine.g_INSTANCE.terrainData.y.slice(lower, upper);
-        // console.log(`Drawing nodes ${nodesToRender}`);
         ctx.beginPath();
 
-        let i = 0;
-        ctx.moveTo(i, nodesToRender[0])
-        for (i = 1; i < nodesToRender.length; i++) {
-            ctx.lineTo(i, nodesToRender[i]);
-        }
+        // Move to the first point
+        const startNodeX = lower;
+        const startNodeY = game.terrainData.y[startNodeX];
+        const screenStartX = (startNodeX - game.viewportX) * scale / game.zoom;
+        const screenStartY = (startNodeY - game.viewportY) * scale / game.zoom;
+        ctx.moveTo(screenStartX, screenStartY);
 
+        // Draw lines to subsequent points
+        for (let i = lower + 1; i < upper; i++) {
+            const nodeY = game.terrainData.y[i];
+            const screenX = (i - game.viewportX) * scale / game.zoom;
+            const screenY = (nodeY - game.viewportY) * scale / game.zoom;
+            ctx.lineTo(screenX, screenY);
+        }
 
         ctx.strokeStyle = "#313131"
         ctx.lineWidth = 2;

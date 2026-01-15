@@ -1,18 +1,18 @@
 import { ImagePath } from "../engine/assetmanager.js";
 import { GameEngine } from "../engine/gameengine.js";
 import { BoxCollider } from "../engine/physics/BoxCollider.js";
-import { Collider } from "../engine/physics/Collider.js";
 import { Entity } from "../engine/Entity.js";
-import { clamp } from "../engine/util.js";
+import { clamp, unwrap, } from "../engine/util.js";
+import { Mountain } from "./mountain.js";
 
 /**
  * @author PG
  * @description The main player class.
  */
 export class Player implements Entity {
-    dX: number = 0;
-    dY: number = 0;
-    physicsCollider = new BoxCollider(10, 20);
+    xV: number = 0;
+    yV: number = 0;
+    physicsCollider = new BoxCollider(1, 2);
 
     sprite: ImagePath = new ImagePath("res/img/player.png");
     X: number = 0;
@@ -21,15 +21,23 @@ export class Player implements Entity {
     tag: string = "player";
 
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void {
-        const sprite = game.getSprite(this.sprite);   // already cached
+        const sprite = game.getSprite(this.sprite);
 
-        const w = sprite.width * 0.25;         // whatever scale you need
-        const h = sprite.height * 0.25;
+        const player_width_in_world_units = 4;
+
+        const meter_in_pixels = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
+
+        const w = player_width_in_world_units * meter_in_pixels;
+        const h = sprite.height * (w / sprite.width);
+
+        const scale = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
+        const screenX = (this.X - game.viewportX) * scale / game.zoom;
+        const screenY = (this.Y - game.viewportY) * scale / game.zoom;
 
         ctx.drawImage(
             sprite,
-            (this.X - game.viewportX) / game.zoom,
-            (this.Y - game.viewportY) / game.zoom,
+            screenX - w / 2,
+            screenY - h,
             w,
             h
         );
@@ -37,20 +45,28 @@ export class Player implements Entity {
 
     update(keys: { [key: string]: boolean }, deltaTime: number): void {
         if (keys["a"]) {
-            this.dX += -200 * deltaTime
+            this.xV += clamp(-200 * deltaTime, -100, 100)
+            this.yV += 10 * deltaTime
         }
         if (keys["d"]) {
-            this.dX += 200 * deltaTime
+            this.xV += clamp(200 * deltaTime, -100, 100)
+            this.yV += 10 * deltaTime
         }
 
-        /// TODO(pg): Move down per frame, check collision with mountain (prolly should have GameEngine handle that)
+        this.yV += clamp((GameEngine.g_INSTANCE.G ** 2) * deltaTime, -100, 100)
 
-        const ents: Entity[] = GameEngine.g_INSTANCE.getEntitiesWithPhysics();
+        this.X = clamp(this.X + (this.xV * deltaTime), 0, Infinity)
+        this.Y += this.yV * deltaTime
 
-
-        this.dY += (GameEngine.g_INSTANCE.G ** 2) * deltaTime
-
-        this.X = clamp(this.X + (this.dX * deltaTime), 0, Infinity)
-        this.Y += this.dY * deltaTime
+        // Colision with the terrain.
+        const mountain = unwrap(GameEngine.g_INSTANCE.getEntityByTag("mountain"));
+        if (mountain && mountain.physicsCollider) {
+            if (this.physicsCollider.collides(this, mountain)) {
+                // TODO: Make the position jump to the nearest surface, or the amount moved should be 
+                // proportional to the distance we are below the terrain
+                this.Y -= this.physicsCollider.height;
+                this.yV = 0;
+            }
+        }
     }
 }
