@@ -2,8 +2,7 @@ import { ImagePath } from "../engine/assetmanager.js";
 import { GameEngine } from "../engine/gameengine.js";
 import { BoxCollider } from "../engine/physics/BoxCollider.js";
 import { Entity } from "../engine/Entity.js";
-import { clamp, unwrap, } from "../engine/util.js";
-import { Mountain } from "./mountain.js";
+import { unwrap } from "../engine/util.js";
 import { Vec2 } from "../engine/types.js";
 
 /**
@@ -12,10 +11,9 @@ import { Vec2 } from "../engine/types.js";
  */
 export class Player implements Entity {
     velocity: Vec2 = new Vec2();
-    physicsCollider = new BoxCollider(1, 2);
-
-    sprite: ImagePath = new ImagePath("res/img/player.png");
     position: Vec2 = new Vec2();
+    physicsCollider = new BoxCollider(1, 2);
+    sprite: ImagePath = new ImagePath("res/img/player.png");
     removeFromWorld: boolean = false;
     tag: string = "player";
 

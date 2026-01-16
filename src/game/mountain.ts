@@ -3,7 +3,6 @@ import { GameEngine } from "../engine/gameengine.js";
 import { MountainCollider } from "../engine/physics/MountainCollider.js";
 import { Entity } from "../engine/Entity.js";
 import { clamp, unwrap } from "../engine/util.js";
-import { Player } from "./player.js";
 import { Vec2 } from "../engine/types.js";
 
 export class Mountain implements Entity {

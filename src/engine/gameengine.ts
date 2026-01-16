@@ -2,8 +2,7 @@ import { DrawLayer } from "./types.js";
 import { Entity } from "./Entity.js";
 import { Timer } from "./timer.js";
 import { AssetManager, ImagePath } from "./assetmanager.js";
-import { sleep, unwrap } from "./util.js";
-import { Player } from "../game/player.js";
+import { sleep } from "./util.js";
 
 export class GameEngine {
     /**
