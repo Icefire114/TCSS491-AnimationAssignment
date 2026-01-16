@@ -1,6 +1,7 @@
+import { Vec2 } from "../types.js";
+
 export interface Collidable {
-    X: number;
-    Y: number;
+    position: Vec2;
     physicsCollider: Collider | null;
 }
 

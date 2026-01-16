@@ -4,6 +4,7 @@ import { MountainCollider } from "../engine/physics/MountainCollider.js";
 import { Entity } from "../engine/Entity.js";
 import { clamp, unwrap } from "../engine/util.js";
 import { Player } from "./player.js";
+import { Vec2 } from "../engine/types.js";
 
 export class Mountain implements Entity {
     physicsCollider: MountainCollider | null = null;
@@ -14,14 +15,12 @@ export class Mountain implements Entity {
         fetch('res/levels/main.json').then(response => response.json()).then(data => {
             GameEngine.g_INSTANCE.terrainData = data;
             this.physicsCollider = new MountainCollider(data.y);
-            unwrap(GameEngine.g_INSTANCE.getEntityByTag("player")).Y = data.y[0] + 20;
+            unwrap(GameEngine.g_INSTANCE.getEntityByTag("player")).position.y = data.y[0] + 20;
         });
     }
 
-    X: number = 0;
-    Y: number = 0;
-    xV: number = 0;
-    yV: number = 0;
+    position: Vec2 = new Vec2();
+    velocity: Vec2 = new Vec2();
     sprite: ImagePath | null = null;
     removeFromWorld: boolean = false;
 

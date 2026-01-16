@@ -24,3 +24,11 @@ export namespace ResourcePath {
         return value as ResourcePath;
     }
 }
+
+/**
+ * A 2D vector
+ */
+export class Vec2 {
+    x: number = 0;
+    y: number = 0;
+}

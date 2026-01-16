@@ -22,13 +22,13 @@ export class MountainCollider implements Collider {
             const box = otherEntity.physicsCollider;
             const boxEntity = otherEntity;
 
-            const boxLeft = boxEntity.X;
-            const boxRight = boxEntity.X + box.width;
-            const boxBottom = boxEntity.Y;
+            const boxLeft = boxEntity.position.x;
+            const boxRight = boxEntity.position.x + box.width;
+            const boxBottom = boxEntity.position.y;
 
             // The mountain's position is an offset.
-            const mountainX = thisEntity.X;
-            const mountainY = thisEntity.Y;
+            const mountainX = thisEntity.position.x;
+            const mountainY = thisEntity.position.y;
 
             // A very simple check: get height of terrain at several points under the box.
             const checkPoints = [boxLeft, (boxLeft + boxRight) / 2, boxRight];

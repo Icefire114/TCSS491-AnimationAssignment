@@ -1,21 +1,15 @@
 import { ImagePath } from "./assetmanager";
 import { GameEngine } from "./gameengine";
 import { Collider } from "./physics/Collider";
+import { Vec2 } from "./types";
 
 /**
  * This is the parent type for all entities, and they should all extend this type.
  */
 
 export type Entity = {
-    /// This is the X position of the entity in WORLD SPACE NOT RENDER SPACE
-    X: number;
-    /// This is the Y position of the entity in WORLD SPACE NOT RENDER SPACE
-    Y: number;
-
-    /// Current x velocity
-    xV: number;
-    /// Current y velocity
-    yV: number;
+    position: Vec2;
+    velocity: Vec2;
 
     physicsCollider: Collider | null;
     sprite: ImagePath | null;

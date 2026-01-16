@@ -176,12 +176,12 @@ export class GameEngine {
             // Horizontal following
             const player_screen_pecentage_x = 0.15;
             const player_world_offset_x = player_screen_pecentage_x * GameEngine.WORLD_UNITS_IN_VIEWPORT;
-            this.viewportX = player.X - player_world_offset_x;
+            this.viewportX = player.position.x - player_world_offset_x;
 
             // Vertical following (center player)
             const aspect_ratio = this.ctx.canvas.height / this.ctx.canvas.width;
             const world_units_in_viewport_y = GameEngine.WORLD_UNITS_IN_VIEWPORT * aspect_ratio;
-            this.viewportY = player.Y - (world_units_in_viewport_y / 2);
+            this.viewportY = player.position.y - (world_units_in_viewport_y / 2);
         }
 
         for (let i = this.entities.length - 1; i >= 0; --i) {
