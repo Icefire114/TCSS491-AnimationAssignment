@@ -25,6 +25,7 @@ jobs:
           npm ci
           npm run build:prod
           cp index.html build/
+          cp -r res/ build/res
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4.0.0
