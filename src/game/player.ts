@@ -24,7 +24,7 @@ export class Player implements Entity {
         ],
         [
             {
-                sprite: new ImagePath("res/img/Wild Zombie/Walk.png"),
+                sprite: new ImagePath("res/img/Wild Zombie/Walk_L.png"),
                 frameHeight: 96,
                 frameWidth: 96,
                 frameCount: 10
@@ -33,14 +33,13 @@ export class Player implements Entity {
         ],
         [
             {
-                sprite: new ImagePath("res/img/Wild Zombie/Walk.png"),
+                sprite: new ImagePath("res/img/Wild Zombie/Walk_R.png"),
                 frameHeight: 96,
                 frameWidth: 96,
                 frameCount: 10
             },
             AnimationState.WALK_R
         ]
-
     ]);
     removeFromWorld: boolean = false;
     tag: string = "player";
@@ -51,15 +50,15 @@ export class Player implements Entity {
 
     update(keys: { [key: string]: boolean }, deltaTime: number): void {
         if (!keys["a"] && !keys["s"] && !keys["w"] && !keys["d"]) {
-            this.animator.updateAnimState(AnimationState.IDLE);
+            this.animator.updateAnimState(AnimationState.IDLE, deltaTime);
         }
 
         if (keys["a"]) {
-            this.animator.updateAnimState(AnimationState.WALK_L)
+            this.animator.updateAnimState(AnimationState.WALK_L, deltaTime);
         } else if (keys["d"]) {
-            this.animator.updateAnimState(AnimationState.WALK_R)
+            this.animator.updateAnimState(AnimationState.WALK_R, deltaTime);
         } else if (keys["w"]) {
-            this.animator.updateAnimState(AnimationState.JUMP)
+            // this.animator.updateAnimState(AnimationState.JUMP, deltaTime);
         }
 
     }

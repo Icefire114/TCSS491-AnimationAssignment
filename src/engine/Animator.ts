@@ -1,7 +1,7 @@
 import { ImagePath } from "./assetmanager.js";
 import { GameEngine } from "./gameengine.js";
 import { Vec2 } from "./types.js";
-import { clamp, unwrap } from "./util.js";
+import { unwrap } from "./util.js";
 
 export enum AnimationState {
     IDLE,
@@ -14,7 +14,6 @@ export enum AnimationState {
     DEATH,
 }
 
-
 export type SpriteSheet = {
     sprite: ImagePath;
     frameWidth: number;
@@ -23,8 +22,14 @@ export type SpriteSheet = {
 };
 
 export class Animator {
-    spriteSheetPaths: [SpriteSheet, AnimationState][];
-    spriteSheet: Record<AnimationState, { sprite: HTMLImageElement, frameWidth: number, frameHeight: number, frameCount: number } | null> = {
+    private readonly ANIMATION_FPS = 10;
+
+    private currentState: AnimationState = AnimationState.IDLE;
+    private frameCounter: number = 0;
+    private elapsed = 0; // seconds
+    private secondsPerFrame = 1 / this.ANIMATION_FPS;
+
+    private spriteSheet: Record<AnimationState, { sprite: HTMLImageElement, frameWidth: number, frameHeight: number, frameCount: number } | null> = {
         [AnimationState.IDLE]: null,
         [AnimationState.WALK_L]: null,
         [AnimationState.WALK_R]: null,
@@ -35,65 +40,39 @@ export class Animator {
         [AnimationState.DEATH]: null
     };
 
-    m_animStateFrameCounts: Record<AnimationState, number> = {
-        [AnimationState.IDLE]: 0,
-        [AnimationState.WALK_L]: 0,
-        [AnimationState.WALK_R]: 0,
-        [AnimationState.JUMP]: 0,
-        [AnimationState.FALL]: 0,
-        [AnimationState.ATTACK]: 0,
-        [AnimationState.HIT]: 0,
-        [AnimationState.DEATH]: 0
-    };
-
     constructor(spriteSheets: [SpriteSheet, AnimationState][]) {
-        this.spriteSheetPaths = spriteSheets;
-
         for (const a of spriteSheets) {
             this.spriteSheet[a[1]] = {
                 sprite: unwrap(GameEngine.g_INSTANCE.getSprite(a[0].sprite)),
-                frameCount: a[0].frameCount,
                 frameHeight: a[0].frameHeight,
-                frameWidth: a[0].frameWidth
+                frameCount: a[0].frameCount,
+                frameWidth: a[0].frameWidth,
             }
         }
-
     }
 
-    updateAnimState(newState: AnimationState): void {
-        const oldStates = this.m_animStateFrameCounts;
-        this.m_animStateFrameCounts = {
-            [AnimationState.IDLE]: 0,
-            [AnimationState.WALK_L]: 0,
-            [AnimationState.WALK_R]: 0,
-            [AnimationState.JUMP]: 0,
-            [AnimationState.FALL]: 0,
-            [AnimationState.ATTACK]: 0,
-            [AnimationState.HIT]: 0,
-            [AnimationState.DEATH]: 0
+    updateAnimState(newState: AnimationState, deltaTime: number): void {
+        if (this.currentState !== newState) {
+            this.currentState = newState;
+            this.elapsed = 0;
+        } else {
+            this.elapsed += deltaTime;
         }
-
-        this.m_animStateFrameCounts[newState] = oldStates[newState] + 1;
     }
 
     drawCurrentAnimFrameAtPos(ctx: CanvasRenderingContext2D, pos: Vec2): void {
-        const animState: AnimationState = Math.max(...Object.values(this.m_animStateFrameCounts)) as AnimationState
-        const currentAnim: {
-            sprite: HTMLImageElement,
-            frameWidth: number,
-            frameHeight: number,
-            frameCount: number
-        } | null = this.spriteSheet[animState];
+        const currentAnim = this.spriteSheet[this.currentState];
 
-        if (currentAnim === null) {
-            throw new Error("SpriteSheet for animation state " + animState + " is null!");
+        if (!currentAnim) {
+            throw new Error(
+                `SpriteSheet for animation state ${this.currentState} is null`
+            );
         }
 
-
-        const frameIdx = this.m_animStateFrameCounts[animState] % currentAnim.frameCount;
+        const frameIdx = Math.floor(this.elapsed / this.secondsPerFrame) % currentAnim.frameCount;
         const game = GameEngine.g_INSTANCE;
 
-        const player_width_in_world_units = 6;
+        const player_width_in_world_units = 10;
 
         const meter_in_pixels = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
 
@@ -104,6 +83,11 @@ export class Animator {
         const screenX = (pos.x - game.viewportX) * scale / game.zoom;
         const screenY = (pos.y - game.viewportY) * scale / game.zoom;
 
+
+        console.log(`drawing frameIdx: ${frameIdx}, with frameCount: ${currentAnim.frameCount}, with frameHeight: ${currentAnim.frameHeight}, with frameWidth: ${currentAnim.frameWidth}, with frameIdx: ${frameIdx}, with screenX: ${screenX}, with screenY: ${screenY}, with w: ${w}, with h: ${h}`);
+        console.log(`sx: ${frameIdx * currentAnim.frameWidth}, sy: ${0}`);
+
+
         ctx.drawImage(
             currentAnim.sprite,
             frameIdx * currentAnim.frameWidth, // srcImgX
@@ -112,8 +96,8 @@ export class Animator {
             currentAnim.frameHeight, // srcImgH
             screenX - w / 2,
             screenY - h,
-            w,
-            h
+            currentAnim.frameWidth,
+            currentAnim.frameHeight
         );
     }
 }

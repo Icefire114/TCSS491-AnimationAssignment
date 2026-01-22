@@ -10,7 +10,8 @@ import { Player } from "./player.js";
 const ASSET_MANAGER = new AssetManager();
 const gameEngine = new GameEngine(ASSET_MANAGER);
 ASSET_MANAGER.queueDownload("res/img/player.png");
-ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Walk.png");
+ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Walk_R.png");
+ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Walk_L.png");
 ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Idle.png");
 
 ASSET_MANAGER.downloadAll((errorCount, successCount) => {
