@@ -39,6 +39,15 @@ export class Player implements Entity {
                 frameCount: 10
             },
             AnimationState.WALK_R
+        ],
+        [
+            {
+                sprite: new ImagePath("res/img/Wild Zombie/Jump.png"),
+                frameHeight: 96,
+                frameWidth: 96,
+                frameCount: 6
+            },
+            AnimationState.JUMP
         ]
     ]);
     removeFromWorld: boolean = false;
@@ -49,7 +58,7 @@ export class Player implements Entity {
     }
 
     update(keys: { [key: string]: boolean }, deltaTime: number): void {
-        if (!keys["a"] && !keys["s"] && !keys["w"] && !keys["d"]) {
+        if (!keys["a"] && !keys["s"] && !keys["w"] && !keys["d"] && !keys[" "]) {
             this.animator.updateAnimState(AnimationState.IDLE, deltaTime);
         }
 
@@ -57,8 +66,8 @@ export class Player implements Entity {
             this.animator.updateAnimState(AnimationState.WALK_L, deltaTime);
         } else if (keys["d"]) {
             this.animator.updateAnimState(AnimationState.WALK_R, deltaTime);
-        } else if (keys["w"]) {
-            // this.animator.updateAnimState(AnimationState.JUMP, deltaTime);
+        } else if (keys["w"] || keys[" "]) {
+            this.animator.updateAnimState(AnimationState.JUMP, deltaTime);
         }
 
     }
