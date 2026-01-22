@@ -1,7 +1,6 @@
 import { AssetManager } from "../engine/assetmanager.js";
 import { GameEngine } from "../engine/gameengine.js";
 import { DrawLayer } from "../engine/types.js";
-import { Mountain } from "./mountain.js";
 import { Player } from "./player.js";
 
 /**
@@ -11,6 +10,8 @@ import { Player } from "./player.js";
 const ASSET_MANAGER = new AssetManager();
 const gameEngine = new GameEngine(ASSET_MANAGER);
 ASSET_MANAGER.queueDownload("res/img/player.png");
+ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Walk.png");
+ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Idle.png");
 
 ASSET_MANAGER.downloadAll((errorCount, successCount) => {
     if (errorCount > 0) {
@@ -24,7 +25,6 @@ ASSET_MANAGER.downloadAll((errorCount, successCount) => {
 
 function main() {
     gameEngine.addEntity(new Player(), DrawLayer.HIGHEST)
-    gameEngine.addEntity(new Mountain(), DrawLayer.of(DrawLayer.HIGHEST - 1));
 
     try {
         gameEngine.start();

@@ -1,9 +1,8 @@
 import { ImagePath } from "../engine/assetmanager.js";
 import { GameEngine } from "../engine/gameengine.js";
-import { BoxCollider } from "../engine/physics/BoxCollider.js";
 import { Entity } from "../engine/Entity.js";
-import { unwrap } from "../engine/util.js";
 import { Vec2 } from "../engine/types.js";
+import { AnimationState, Animator } from "../engine/Animator.js";
 
 /**
  * @author PG
@@ -12,82 +11,56 @@ import { Vec2 } from "../engine/types.js";
 export class Player implements Entity {
     velocity: Vec2 = new Vec2();
     position: Vec2 = new Vec2();
-    physicsCollider = new BoxCollider(1, 2);
     sprite: ImagePath = new ImagePath("res/img/player.png");
+    animator: Animator = new Animator([
+        [
+            {
+                sprite: new ImagePath("res/img/Wild Zombie/Idle.png"),
+                frameHeight: 96,
+                frameWidth: 96,
+                frameCount: 9
+            },
+            AnimationState.IDLE
+        ],
+        [
+            {
+                sprite: new ImagePath("res/img/Wild Zombie/Walk.png"),
+                frameHeight: 96,
+                frameWidth: 96,
+                frameCount: 10
+            },
+            AnimationState.WALK_L
+        ],
+        [
+            {
+                sprite: new ImagePath("res/img/Wild Zombie/Walk.png"),
+                frameHeight: 96,
+                frameWidth: 96,
+                frameCount: 10
+            },
+            AnimationState.WALK_R
+        ]
+
+    ]);
     removeFromWorld: boolean = false;
     tag: string = "player";
 
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void {
-        const sprite = game.getSprite(this.sprite);
-
-        const player_width_in_world_units = 4;
-
-        const meter_in_pixels = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
-
-        const w = player_width_in_world_units * meter_in_pixels;
-        const h = sprite.height * (w / sprite.width);
-
-        const scale = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
-        const screenX = (this.position.x - game.viewportX) * scale / game.zoom;
-        const screenY = (this.position.y - game.viewportY) * scale / game.zoom;
-
-        ctx.drawImage(
-            sprite,
-            screenX - w / 2,
-            screenY - h,
-            w,
-            h
-        );
+        this.animator.drawCurrentAnimFrameAtPos(ctx, this.position);
     }
 
     update(keys: { [key: string]: boolean }, deltaTime: number): void {
-        const onGround = this.velocity.y === 0; // fix later
-
-        // -- Base movement: simulating sliding down a mountain --
-        const slideForce = 10; // Constant downward and rightward force
-        this.velocity.x += slideForce * deltaTime;
-
-        // -- Player input --
-
-        // D key: Speed up
-        if (keys["d"]) {
-            this.velocity.x += 250 * deltaTime;
+        if (!keys["a"] && !keys["s"] && !keys["w"] && !keys["d"]) {
+            this.animator.updateAnimState(AnimationState.IDLE);
         }
 
-        // A key: Brake
         if (keys["a"]) {
-            this.velocity.x = Math.max(1, this.velocity.x - 200 * deltaTime); // Reduce x velocity, but not below 1
-            this.velocity.y = Math.max(1, this.velocity.y - 200 * deltaTime); // Reduce y velocity, but not below 1
+            this.animator.updateAnimState(AnimationState.WALK_L)
+        } else if (keys["d"]) {
+            this.animator.updateAnimState(AnimationState.WALK_R)
+        } else if (keys["w"]) {
+            this.animator.updateAnimState(AnimationState.JUMP)
         }
 
-        // W or Space key: Jump
-        if ((keys["w"] || keys[" "]) && onGround) {
-            this.velocity.y = -15; // Apply an upward force for jumping
-        }
-
-
-        // -- Physics simulation --
-
-        // Gravity
-        this.velocity.y += GameEngine.g_INSTANCE.G * deltaTime;
-
-        // Friction
-        const friction = 0.01;
-        this.velocity.x *= (1 - friction);
-
-        // Apply velocity to position
-        this.position.x += this.velocity.x * deltaTime;
-        this.position.y += this.velocity.y * deltaTime;
-
-        // -- Collision with terrain --
-        const mountain = unwrap(GameEngine.g_INSTANCE.getEntityByTag("mountain"));
-        if (mountain && mountain.physicsCollider) {
-            if (this.physicsCollider.collides(this, mountain)) {
-                // TODO: Make the position jump to the nearest surface, or the amount moved should be 
-                // proportional to the distance we are below the terrain
-                this.position.y -= this.physicsCollider.height;
-                this.velocity.y = 0;
-            }
-        }
     }
 }

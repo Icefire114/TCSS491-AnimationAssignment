@@ -75,7 +75,7 @@ export class GameEngine {
         GameEngine.g_INSTANCE = this;
     };
 
-    getSprite(path: ImagePath): HTMLImageElement {
+    getSprite(path: ImagePath): HTMLImageElement | undefined {
         return this.assetManager.getImage(path);
     }
 
@@ -211,12 +211,5 @@ export class GameEngine {
      */
     getEntityByTag(tag: string): Entity | undefined {
         return this.entities.find(ent => ent[0].tag === tag)?.[0];
-    };
-
-    /**
-     * @returns A list of all entities with physics.
-     */
-    getEntitiesWithPhysics(): Entity[] {
-        return this.entities.filter(ent => ent[0].physicsCollider !== null).map(ent => ent[0]);
     };
 };
