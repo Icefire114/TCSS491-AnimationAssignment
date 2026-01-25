@@ -86,17 +86,17 @@ export class Player implements Entity {
         // Handle horizontal movement + facing
         if (keys["a"]) {
             this.facing = "left";
-            this.velocity.x += -1 * 500 * deltaTime;
+            this.velocity.x += -1 * 50 * deltaTime;
         } else if (keys["d"]) {
             this.facing = "right";
-            this.velocity.x += 1 * 500 * deltaTime;
+            this.velocity.x += 1 * 50 * deltaTime;
         }
 
         // Handle jump initiation
         if ((keys["w"] || keys[" "]) && this.onGround) {
             this.onGround = false;
             this.jumpTimer = this.jumpDuration;
-            this.velocity.y = -Math.abs(this.velocity.y);
+            this.velocity.y = -9.81 * 50 * deltaTime;
         }
 
         // Jumping
