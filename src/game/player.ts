@@ -4,6 +4,14 @@ import { Entity } from "../engine/Entity.js";
 import { Vec2 } from "../engine/types.js";
 import { AnimationState, Animator } from "../engine/Animator.js";
 
+
+enum State {
+    IDLE,
+    WALKING,
+    JUMPING,
+    FALLING
+}
+
 /**
  * @author PG
  * @description The main player class.
@@ -49,26 +57,57 @@ export class Player implements Entity {
             },
             AnimationState.JUMP
         ]
-    ]);
+    ],
+        { x: 20, y: 20 });
     removeFromWorld: boolean = false;
     tag: string = "player";
+
+    state: State = State.IDLE;
+    jumpDuration: number = 1; // Animator frames per second * jump animation frame count
+    private jumpTimer: number = 0;   // seconds remaining in current jump
+    private onGround: boolean = true;
 
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void {
         this.animator.drawCurrentAnimFrameAtPos(ctx, this.position);
     }
 
+
     update(keys: { [key: string]: boolean }, deltaTime: number): void {
-        if (!keys["a"] && !keys["s"] && !keys["w"] && !keys["d"] && !keys[" "]) {
-            this.animator.updateAnimState(AnimationState.IDLE, deltaTime);
+        // Handle jump initiation
+        if ((keys["w"] || keys[" "]) && this.onGround) {
+            this.onGround = false;
+            this.jumpTimer = this.jumpDuration;
+            this.velocity.y = -Math.abs(this.velocity.y); // give an upward impulse
         }
 
-        if (keys["a"]) {
-            this.animator.updateAnimState(AnimationState.WALK_L, deltaTime);
-        } else if (keys["d"]) {
-            this.animator.updateAnimState(AnimationState.WALK_R, deltaTime);
-        } else if (keys["w"] || keys[" "]) {
+        // Count down the jump timer
+        if (!this.onGround) {
+            this.jumpTimer -= deltaTime;
+            if (this.jumpTimer <= 0 || /* insert landing condition here */ false) {
+                this.onGround = true;
+            }
+        }
+
+        // Set state based on current situation
+        if (!this.onGround) {
+            this.state = State.JUMPING;
             this.animator.updateAnimState(AnimationState.JUMP, deltaTime);
+            return;
         }
 
+        if (keys["a"] || keys["d"]) {
+            this.state = State.WALKING;
+            this.animator.updateAnimState(
+                keys["a"] ? AnimationState.WALK_L : AnimationState.WALK_R,
+                deltaTime
+            );
+            return;
+        }
+
+        // Default to idle
+        this.state = State.IDLE;
+        this.animator.updateAnimState(AnimationState.IDLE, deltaTime);
     }
+
 }
+

@@ -14,7 +14,7 @@ export enum AnimationState {
     DEATH,
 }
 
-export type SpriteSheet = {
+export type SpriteSheetInfo = {
     sprite: ImagePath;
     frameWidth: number;
     frameHeight: number;
@@ -22,31 +22,44 @@ export type SpriteSheet = {
 };
 
 export class Animator {
-    private readonly ANIMATION_FPS = 10;
+    private readonly ANIMATION_FPS = 6;
 
     private currentState: AnimationState = AnimationState.IDLE;
-    private frameCounter: number = 0;
     private elapsed = 0; // seconds
     private secondsPerFrame = 1 / this.ANIMATION_FPS;
+    private forceScaleToSize: Vec2 | undefined;
 
-    private spriteSheet: Record<AnimationState, { sprite: HTMLImageElement, frameWidth: number, frameHeight: number, frameCount: number } | null> = {
-        [AnimationState.IDLE]: null,
-        [AnimationState.WALK_L]: null,
-        [AnimationState.WALK_R]: null,
-        [AnimationState.JUMP]: null,
-        [AnimationState.FALL]: null,
-        [AnimationState.ATTACK]: null,
-        [AnimationState.HIT]: null,
-        [AnimationState.DEATH]: null
-    };
+    private spriteSheet: Record<AnimationState,
+        {
+            sprite: HTMLImageElement,
+            frameWidth: number,
+            frameHeight: number,
+            frameCount: number
+        } | null
+    > = {
+            [AnimationState.IDLE]: null,
+            [AnimationState.WALK_L]: null,
+            [AnimationState.WALK_R]: null,
+            [AnimationState.JUMP]: null,
+            [AnimationState.FALL]: null,
+            [AnimationState.ATTACK]: null,
+            [AnimationState.HIT]: null,
+            [AnimationState.DEATH]: null
+        };
 
-    constructor(spriteSheets: [SpriteSheet, AnimationState][]) {
-        for (const a of spriteSheets) {
-            this.spriteSheet[a[1]] = {
-                sprite: unwrap(GameEngine.g_INSTANCE.getSprite(a[0].sprite)),
-                frameHeight: a[0].frameHeight,
-                frameCount: a[0].frameCount,
-                frameWidth: a[0].frameWidth,
+    /**
+     * @param spriteSheets The spite sheets and the animation state that they correspond to.
+     * @param forceScaleToSize If provided, then the resulting animation will be scaled to that size 
+     * (useful for items where sprites are not the same size).
+     */
+    constructor(spriteSheets: [SpriteSheetInfo, AnimationState][], forceScaleToSize?: Vec2) {
+        this.forceScaleToSize = forceScaleToSize;
+        for (const spriteSheet of spriteSheets) {
+            this.spriteSheet[spriteSheet[1]] = {
+                sprite: unwrap(GameEngine.g_INSTANCE.getSprite(spriteSheet[0].sprite)),
+                frameHeight: spriteSheet[0].frameHeight,
+                frameCount: spriteSheet[0].frameCount,
+                frameWidth: spriteSheet[0].frameWidth,
             }
         }
     }
@@ -69,35 +82,32 @@ export class Animator {
             );
         }
 
-        const frameIdx = Math.floor(this.elapsed / this.secondsPerFrame) % currentAnim.frameCount;
+
+        const frameIdx =
+            Math.floor(this.elapsed / this.secondsPerFrame) % currentAnim.frameCount;
         const game = GameEngine.g_INSTANCE;
 
-        const player_width_in_world_units = 10;
+        const meterInPixels = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
 
-        const meter_in_pixels = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
+        // Target dimensions in screen pixels
+        const targetW = this.forceScaleToSize
+            ? this.forceScaleToSize.x * meterInPixels / game.zoom
+            : currentAnim.frameWidth;
 
-        const w = player_width_in_world_units * meter_in_pixels;
-        const h = currentAnim.sprite.height * (w / currentAnim.sprite.width);
-
-        const scale = ctx.canvas.width / GameEngine.WORLD_UNITS_IN_VIEWPORT;
-        const screenX = (pos.x - game.viewportX) * scale / game.zoom;
-        const screenY = (pos.y - game.viewportY) * scale / game.zoom;
-
-
-        console.log(`drawing frameIdx: ${frameIdx}, with frameCount: ${currentAnim.frameCount}, with frameHeight: ${currentAnim.frameHeight}, with frameWidth: ${currentAnim.frameWidth}, with frameIdx: ${frameIdx}, with screenX: ${screenX}, with screenY: ${screenY}, with w: ${w}, with h: ${h}`);
-        console.log(`sx: ${frameIdx * currentAnim.frameWidth}, sy: ${0}`);
-
+        const targetH = this.forceScaleToSize
+            ? this.forceScaleToSize.y * meterInPixels / game.zoom
+            : currentAnim.frameHeight;
 
         ctx.drawImage(
             currentAnim.sprite,
-            frameIdx * currentAnim.frameWidth, // srcImgX
-            0, // srcImgY
-            currentAnim.frameWidth, // srcImgW
-            currentAnim.frameHeight, // srcImgH
-            screenX - w / 2,
-            screenY - h,
-            currentAnim.frameWidth,
-            currentAnim.frameHeight
+            frameIdx * currentAnim.frameWidth, // srcX
+            0, // srcY
+            currentAnim.frameWidth, // srcW
+            currentAnim.frameHeight, // srcH
+            (pos.x - game.viewportX) * meterInPixels / game.zoom, // dstX
+            (pos.y - game.viewportY) * meterInPixels / game.zoom, // dstY
+            targetW, // dstW
+            targetH  // dstH
         );
     }
 }
