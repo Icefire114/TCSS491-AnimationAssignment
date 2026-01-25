@@ -12,7 +12,8 @@ const gameEngine = new GameEngine(ASSET_MANAGER);
 ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Walk_R.png");
 ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Walk_L.png");
 ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Idle.png");
-ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Jump.png");
+ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Jump_L.png");
+ASSET_MANAGER.queueDownload("res/img/Wild Zombie/Jump_R.png");
 
 ASSET_MANAGER.downloadAll((errorCount, successCount) => {
     if (errorCount > 0) {

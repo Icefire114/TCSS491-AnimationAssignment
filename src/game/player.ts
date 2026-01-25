@@ -50,12 +50,21 @@ export class Player implements Entity {
         ],
         [
             {
-                sprite: new ImagePath("res/img/Wild Zombie/Jump.png"),
+                sprite: new ImagePath("res/img/Wild Zombie/Jump_R.png"),
                 frameHeight: 96,
                 frameWidth: 96,
                 frameCount: 6
             },
-            AnimationState.JUMP
+            AnimationState.JUMP_R
+        ],
+        [
+            {
+                sprite: new ImagePath("res/img/Wild Zombie/Jump_L.png"),
+                frameHeight: 96,
+                frameWidth: 96,
+                frameCount: 6
+            },
+            AnimationState.JUMP_L
         ]
     ],
         { x: 20, y: 20 });
@@ -66,6 +75,7 @@ export class Player implements Entity {
     jumpDuration: number = 1; // Animator frames per second * jump animation frame count
     private jumpTimer: number = 0;   // seconds remaining in current jump
     private onGround: boolean = true;
+    private facing: "left" | "right" = "right";
 
     draw(ctx: CanvasRenderingContext2D, game: GameEngine): void {
         this.animator.drawCurrentAnimFrameAtPos(ctx, this.position);
@@ -73,41 +83,64 @@ export class Player implements Entity {
 
 
     update(keys: { [key: string]: boolean }, deltaTime: number): void {
+        // Handle horizontal movement + facing
+        if (keys["a"]) {
+            this.facing = "left";
+            this.velocity.x += -1 * 500 * deltaTime;
+        } else if (keys["d"]) {
+            this.facing = "right";
+            this.velocity.x += 1 * 500 * deltaTime;
+        }
+
         // Handle jump initiation
         if ((keys["w"] || keys[" "]) && this.onGround) {
             this.onGround = false;
             this.jumpTimer = this.jumpDuration;
-            this.velocity.y = -Math.abs(this.velocity.y); // give an upward impulse
+            this.velocity.y = -Math.abs(this.velocity.y);
         }
 
-        // Count down the jump timer
+        // Jumping
         if (!this.onGround) {
             this.jumpTimer -= deltaTime;
-            if (this.jumpTimer <= 0 || /* insert landing condition here */ false) {
+
+            const jumpAnim =
+                this.facing === "left"
+                    ? AnimationState.JUMP_L
+                    : AnimationState.JUMP_R;
+
+            this.state = State.JUMPING;
+            this.animator.updateAnimState(jumpAnim, deltaTime);
+            this.updatePosition(deltaTime);
+
+            if (this.jumpTimer <= 0) {
                 this.onGround = true;
             }
-        }
 
-        // Set state based on current situation
-        if (!this.onGround) {
-            this.state = State.JUMPING;
-            this.animator.updateAnimState(AnimationState.JUMP, deltaTime);
             return;
         }
 
+        // Walking
         if (keys["a"] || keys["d"]) {
             this.state = State.WALKING;
             this.animator.updateAnimState(
-                keys["a"] ? AnimationState.WALK_L : AnimationState.WALK_R,
+                this.facing === "left"
+                    ? AnimationState.WALK_L
+                    : AnimationState.WALK_R,
                 deltaTime
             );
+            this.updatePosition(deltaTime);
             return;
         }
 
-        // Default to idle
+        // Idle
         this.state = State.IDLE;
         this.animator.updateAnimState(AnimationState.IDLE, deltaTime);
+        this.updatePosition(deltaTime);
     }
 
+    updatePosition(deltaTime: number): void {
+        this.position.x += this.velocity.x * deltaTime;
+        this.position.y += this.velocity.y * deltaTime;
+    }
 }
 
